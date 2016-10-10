@@ -34,6 +34,25 @@ class TextFormatter(object):
             result += ", doi:" + work.doi
 
             return result
+
+        elif type(work) == worktype.ConferencePaper:
+            result = ''
+            formatted_authors = [self.__format_author(a) for a in work.authors]
+            if len(formatted_authors) == 0:
+                pass
+            elif len(formatted_authors) == 1:
+                result += formatted_authors[0]
+            elif len(formatted_authors) == 2:
+                result += ' and '.join(formatted_authors)
+            else:
+                result += ', '.join(formatted_authors[0:-1]) \
+                        + ', and ' + formatted_authors[-1]
+            result += ", '" + work.title + "'"
+            result += ", " + work.conference
+            result += ", %d" % work.date['date-parts'][0][0]
+            result += ", doi:" + work.doi
+
+            return result
                                     
         else:
             raise RuntimeError('TextFormatter does not support this work type.')
@@ -69,7 +88,27 @@ class HTMLFormatter(object):
             result += ", doi:" + work.doi
 
             return result
-                                    
+
+        elif type(work) == worktype.ConferencePaper:
+            result = ''
+            formatted_authors = [self.__format_author(a) for a in work.authors]
+            if len(formatted_authors) == 0:
+                pass
+            elif len(formatted_authors) == 1:
+                result += formatted_authors[0]
+            elif len(formatted_authors) == 2:
+                result += ' and '.join(formatted_authors)
+            else:
+                result += ', '.join(formatted_authors[0:-1]) \
+                        + ', and ' + formatted_authors[-1]
+            result += ", '" + work.title + "'"
+            result += ", <em>%s</em>" % work.conference
+
+            result += ", %d" % work.date['date-parts'][0][0]
+            result += ", doi:" + work.doi
+
+            return result
+        
         else:
             raise RuntimeError('HTMLFormatter does not support this work type.')
 
@@ -94,7 +133,7 @@ class BibtexFormatter(object):
 
     def __make_identifier(self, work):
 	root = '%s%02d' % ( work.authors[0]['family'].replace(' ','').lower(),
-                        work.date_published['date-parts'][0][0] % 100 )
+                        work.date['date-parts'][0][0] % 100 )
 
 	if root not in self.used_identifiers:
 	    self.used_identifiers.append(root)
@@ -151,7 +190,26 @@ class BibtexFormatter(object):
             result += " pages = {%s},\n" % \
                       self.__bibtex_escape(self.__format_pages(work.pages))
             result += " year = {%d},\n" % \
-                      work.date_published['date-parts'][0][0]
+                      work.date['date-parts'][0][0]
+            result += " doi = {%s}\n}" % self.__bibtex_escape(work.doi)
+
+            return result
+        elif type(work) == worktype.ConferencePaper:
+            result = '@inproceedings{%s,\n' \
+                     % self.__make_identifier(work)
+            formatted_authors = [self.__format_author(a) for a in work.authors]
+            result += " title = {%s},\n" % \
+                      self.__format_title(self.__bibtex_escape(work.title))
+
+            result += " author = {%s},\n" % \
+                      self.__bibtex_escape(' and '.join(formatted_authors))
+
+            result += " booktitle = {%s},\n" % self.__bibtex_escape(work.conference)
+            if work.pages != None:
+                result += " pages = {%s},\n" % \
+                          self.__bibtex_escape(self.__format_pages(work.pages))
+            result += " year = {%d},\n" % \
+                      work.date['date-parts'][0][0]
             result += " doi = {%s}\n}" % self.__bibtex_escape(work.doi)
 
             return result
