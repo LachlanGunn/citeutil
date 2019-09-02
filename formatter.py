@@ -112,6 +112,61 @@ class HTMLFormatter(object):
         else:
             raise RuntimeError('HTMLFormatter does not support this work type.')
 
+class LaTeXFormatter(object):
+    def __init__(self):
+        pass
+
+    def __format_author(self, author):
+        return re.sub('\.(\w)', '.~\\1', author['given']) \
+            + ' ' + author['family']
+        
+    def format(self, work):
+        if type(work) == worktype.JournalPaper:
+            result = ''
+            formatted_authors = [self.__format_author(a) for a in work.authors]
+            if len(formatted_authors) == 0:
+                pass
+            elif len(formatted_authors) == 1:
+                result += formatted_authors[0]
+            elif len(formatted_authors) == 2:
+                result += ' and '.join(formatted_authors)
+            else:
+                result += ', '.join(formatted_authors[0:-1]) \
+                        + ', and ' + formatted_authors[-1]
+            result += ", ``" + work.title + "''"
+            result += ", \emph{%s}" % work.journal
+            result +=  ", \textbf{%s}" % work.issue[0]
+            if len(work.issue) > 1:
+                result += "(%s)" % work.issue[1]
+
+            result += ", %d" % work.date_published['date-parts'][0][0]
+            result += ", doi:" + work.doi
+
+            return result
+
+        elif type(work) == worktype.ConferencePaper:
+            result = ''
+            formatted_authors = [self.__format_author(a) for a in work.authors]
+            if len(formatted_authors) == 0:
+                pass
+            elif len(formatted_authors) == 1:
+                result += formatted_authors[0]
+            elif len(formatted_authors) == 2:
+                result += ' and '.join(formatted_authors)
+            else:
+                result += ', '.join(formatted_authors[0:-1]) \
+                        + ', and ' + formatted_authors[-1]
+            result += ", ``" + work.title + "''"
+            result += ", \emph{%s}" % work.conference
+
+            result += ", %d" % work.date['date-parts'][0][0]
+            result += ", doi:" + work.doi
+
+            return result
+        
+        else:
+            raise RuntimeError('HTMLFormatter does not support this work type.')
+
 class BibtexFormatter(object):
     def __init__(self, proper_names):
         self.proper_names = proper_names
