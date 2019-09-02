@@ -3,6 +3,7 @@
 import worktype
 import re
 
+
 class TextFormatter(object):
     def __init__(self):
         pass
@@ -10,7 +11,7 @@ class TextFormatter(object):
     def __format_author(self, author):
         return re.sub('\.(\w)', '. \\1', author['given']) \
             + ' ' + author['family']
-        
+
     def format(self, work):
         if type(work) == worktype.JournalPaper:
             result = ''
@@ -25,8 +26,8 @@ class TextFormatter(object):
                 result += ', '.join(formatted_authors[0:-1]) \
                         + ', and ' + formatted_authors[-1]
             result += ", '" + work.title + "'"
-            result += ", "  + work.journal
-            result +=  ", " + work.issue[0]
+            result += ", " + work.journal
+            result += ", " + work.issue[0]
             if len(work.issue) > 1:
                 result += "(%s)" % work.issue[1]
 
@@ -53,9 +54,11 @@ class TextFormatter(object):
             result += ", doi:" + work.doi
 
             return result
-                                    
+
         else:
-            raise RuntimeError('TextFormatter does not support this work type.')
+            raise RuntimeError(
+                'TextFormatter does not support this work type.')
+
 
 class HTMLFormatter(object):
     def __init__(self):
@@ -64,7 +67,7 @@ class HTMLFormatter(object):
     def __format_author(self, author):
         return re.sub('\.(\w)', '.&nbsp;\\1', author['given']) \
             + ' ' + author['family']
-        
+
     def format(self, work):
         if type(work) == worktype.JournalPaper:
             result = ''
@@ -80,7 +83,7 @@ class HTMLFormatter(object):
                         + ', and ' + formatted_authors[-1]
             result += ", '" + work.title + "'"
             result += ", <em>%s</em>" % work.journal
-            result +=  ", <strong>%s</strong>" % work.issue[0]
+            result += ", <strong>%s</strong>" % work.issue[0]
             if len(work.issue) > 1:
                 result += "(%s)" % work.issue[1]
 
@@ -108,9 +111,11 @@ class HTMLFormatter(object):
             result += ", doi:" + work.doi
 
             return result
-        
+
         else:
-            raise RuntimeError('HTMLFormatter does not support this work type.')
+            raise RuntimeError(
+                'HTMLFormatter does not support this work type.')
+
 
 class LaTeXFormatter(object):
     def __init__(self):
@@ -119,7 +124,7 @@ class LaTeXFormatter(object):
     def __format_author(self, author):
         return re.sub('\.(\w)', '.~\\1', author['given']) \
             + ' ' + author['family']
-        
+
     def format(self, work):
         if type(work) == worktype.JournalPaper:
             result = ''
@@ -135,7 +140,7 @@ class LaTeXFormatter(object):
                         + ', and ' + formatted_authors[-1]
             result += ", ``" + work.title + "''"
             result += ", \emph{%s}" % work.journal
-            result +=  ", \textbf{%s}" % work.issue[0]
+            result += ", \textbf{%s}" % work.issue[0]
             if len(work.issue) > 1:
                 result += "(%s)" % work.issue[1]
 
@@ -163,14 +168,16 @@ class LaTeXFormatter(object):
             result += ", doi:" + work.doi
 
             return result
-        
+
         else:
-            raise RuntimeError('HTMLFormatter does not support this work type.')
+            raise RuntimeError(
+                'HTMLFormatter does not support this work type.')
+
 
 class BibtexFormatter(object):
     def __init__(self, proper_names):
         self.proper_names = proper_names
-	self.used_identifiers = []
+        self.used_identifiers = []
 
     def __format_author(self, author):
         result = re.sub('\\.(\w)', '. \\1', author['given']) \
@@ -187,44 +194,45 @@ class BibtexFormatter(object):
         return re.sub('([^\\s]*[A-Z]\w*[A-Z][^\\s]*)', '{\\1}', title)
 
     def __make_identifier(self, work):
-	root = '%s%02d' % ( work.authors[0]['family'].replace(' ','').lower(),
-                        work.date['date-parts'][0][0] % 100 )
+        root = '%s%02d' % (work.authors[0]['family'].replace(' ', '').lower(),
+                           work.date['date-parts'][0][0] % 100)
 
-	if root not in self.used_identifiers:
-	    self.used_identifiers.append(root)
-	    return root
+        if root not in self.used_identifiers:
+            self.used_identifiers.append(root)
+            return root
 
-	# The list of used identifiers is finite so this must terminate.
-	suffix_length = 0
-	suffix = ''
-	alphabet_size = 26
-	while True:
-	    suffix_length += 1
-	    suffix = ['a']*suffix_length
-	    final_suffix = [chr(ord('a')+alphabet_size-1)]*suffix_length
-	    while True:
+        # The list of used identifiers is finite so this must terminate.
+        suffix_length = 0
+        suffix = ''
+        alphabet_size = 26
+        while True:
+            suffix_length += 1
+            suffix = ['a'] * suffix_length
+            final_suffix = [chr(ord('a') + alphabet_size - 1)] * suffix_length
+            while True:
 
-		new_identifier = root + ''.join(suffix)
-		if new_identifier not in self.used_identifiers:
-		    self.used_identifiers.append(new_identifier)
-		    return new_identifier
+                new_identifier = root + ''.join(suffix)
+                if new_identifier not in self.used_identifiers:
+                    self.used_identifiers.append(new_identifier)
+                    return new_identifier
 
-		if suffix == final_suffix:
-		    break
+                if suffix == final_suffix:
+                    break
 
-		# Increment the suffix
-		for i in range(1,suffix_length+1):
-		    new_suffix_num = ord(suffix[-i])-ord('a')+1
-		    suffix[-i] = chr((new_suffix_num%alphabet_size)+ord('a'))
-		    if new_suffix_num < alphabet_size:
-			    break
+                # Increment the suffix
+                for i in range(1, suffix_length + 1):
+                    new_suffix_num = ord(suffix[-i]) - ord('a') + 1
+                    suffix[-i] = chr((new_suffix_num % alphabet_size) +
+                                     ord('a'))
+                    if new_suffix_num < alphabet_size:
+                        break
 
     def __bibtex_escape(self, text):
         return text.replace("{", "\\{")\
                    .replace("}", "\\}")\
                    .replace("\"","\"")\
-		   .replace("&", "\\&")
-        
+     .replace("&", "\\&")
+
     def format(self, work):
         if type(work) == worktype.JournalPaper:
             result = '@article{%s,\n' \
@@ -237,7 +245,7 @@ class BibtexFormatter(object):
                       self.__bibtex_escape(' and '.join(formatted_authors))
 
             result += " journal = {%s},\n" % self.__bibtex_escape(work.journal)
-            result +=  " volume = {%s},\n" % self.__bibtex_escape(work.issue[0])
+            result += " volume = {%s},\n" % self.__bibtex_escape(work.issue[0])
             if len(work.issue) > 1:
                 result += " number = {%s},\n" % \
                           self.__bibtex_escape(work.issue[1])
@@ -259,7 +267,8 @@ class BibtexFormatter(object):
             result += " author = {%s},\n" % \
                       self.__bibtex_escape(' and '.join(formatted_authors))
 
-            result += " booktitle = {%s},\n" % self.__bibtex_escape(work.conference)
+            result += " booktitle = {%s},\n" % self.__bibtex_escape(
+                work.conference)
             if work.pages != None:
                 result += " pages = {%s},\n" % \
                           self.__bibtex_escape(self.__format_pages(work.pages))
@@ -269,5 +278,5 @@ class BibtexFormatter(object):
 
             return result
         else:
-            raise RuntimeError('TextFormatter does not support this work type.')
-
+            raise RuntimeError(
+                'TextFormatter does not support this work type.')

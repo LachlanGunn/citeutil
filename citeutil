@@ -11,21 +11,25 @@ import formatter
 import source
 import worktype
 
+
 def process_doi(raw_doi, reference_formatter):
     try:
         work = source.retrieve_from_doi(raw_doi)
         print reference_formatter.format(work)
     except IOError, e:
-        print >>sys.stderr, "Could not load DOI: %s" % str(e)
+        print >> sys.stderr, "Could not load DOI: %s" % str(e)
         raise e
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--format', help='output format',
-			default='bibtex', type=str,
-			choices=['bibtex', 'latex', 'html', 'text'])
-    parser.add_argument('doi', help='DOIs to look up',
-			nargs='+', type=str)
+    parser.add_argument(
+        '--format',
+        help='output format',
+        default='bibtex',
+        type=str,
+        choices=['bibtex', 'latex', 'html', 'text'])
+    parser.add_argument('doi', help='DOIs to look up', nargs='+', type=str)
 
     arguments = parser.parse_args()
 
@@ -35,13 +39,13 @@ if __name__ == '__main__':
 
     reference_formatter = None
     if arguments.format == 'bibtex':
-	reference_formatter = formatter.BibtexFormatter(proper_names)
+        reference_formatter = formatter.BibtexFormatter(proper_names)
     elif arguments.format == 'latex':
-	reference_formatter = formatter.LaTeXFormatter()
+        reference_formatter = formatter.LaTeXFormatter()
     elif arguments.format == 'html':
-	reference_formatter = formatter.HTMLFormatter()
+        reference_formatter = formatter.HTMLFormatter()
     elif arguments.format == 'text':
-	reference_formatter = formatter.TextFormatter()
+        reference_formatter = formatter.TextFormatter()
 
     for doi in arguments.doi:
-	    process_doi(doi, reference_formatter)
+        process_doi(doi, reference_formatter)

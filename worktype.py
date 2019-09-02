@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
+
 class Work(object):
     def __init__(self, json_data):
         self.json = json_data
+
 
 class ConferencePaper(Work):
     def __init__(self, json_data):
@@ -39,13 +41,14 @@ class JournalPaper(Work):
             self.date = json_data['published-print']
         elif json_data.has_key('issued'):
             self.date = json_data['issued']
-            
+
         self.pages = json_data['page']
 
         if json_data.has_key('issue'):
             self.issue = (json_data['volume'], json_data['issue'])
         else:
             self.issue = (json_data['volume'])
+
 
 def parse_work(json_data):
     if json_data['type'] == 'proceedings-article':

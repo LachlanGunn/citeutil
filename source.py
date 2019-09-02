@@ -6,7 +6,9 @@ import requests
 
 import worktype
 
-doi_regexp = re.compile("^((?:doi:)|(https?://dx.doi.org/))?(10(?:\.(?:[^./]+))+)/(.*)$", re.I)
+doi_regexp = re.compile(
+    "^((?:doi:)|(https?://dx.doi.org/))?(10(?:\.(?:[^./]+))+)/(.*)$", re.I)
+
 
 def retrieve_from_doi(raw_doi):
     match = doi_regexp.match(raw_doi)
@@ -20,7 +22,7 @@ def retrieve_from_doi(raw_doi):
     doi_urlencoded = requests.utils.quote(prefix, '') \
                      + '/' + requests.utils.quote(suffix, '')
 
-    work_url  = 'http://api.crossref.org/works/%s' % doi_urlencoded
+    work_url = 'http://api.crossref.org/works/%s' % doi_urlencoded
     agency_url = work_url + '/agency'
 
     # First check that we have a Crossref DOI
